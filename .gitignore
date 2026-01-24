@@ -1,0 +1,37 @@
+# Unity 自动生成的文件和目录
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+
+# 项目设置和工程文件
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+
+# VS Code 和 Rider 等编辑器目录
+.vscode/
+.idea/
+.vs/
+.jetbrains/
+
+# 不需要版本控制的资源
+[Aa]ssets/AssetStoreTools*
+*.private
+*.private.meta
+
+# 自动生成的文件夹
+[Aa]ssets/Plugins/Editor/Coroutine
+ExportedObj/
+.consulo/
+
+# 缓存文件
+*.dcache
