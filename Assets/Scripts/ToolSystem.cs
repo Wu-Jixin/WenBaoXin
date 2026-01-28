@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -271,8 +272,18 @@ public class ToolSystem : MonoBehaviour
             // 保存原始缩放
             originalToolScale = currentToolInstance.transform.localScale;
 
-            // ⚠️ 不再设置标签，避免警告
-            // currentToolInstance.tag = "CurrentTool";
+            // 设置工具标签（检查标签是否存在）
+            string toolTag = "Tool";
+            if (!UnityEditorInternal.InternalEditorUtility.tags.Contains(toolTag))
+            {
+                // 标签不存在，创建它
+#if UNITY_EDITOR
+                UnityEditorInternal.InternalEditorUtility.AddTag(toolTag);
+#endif
+                Debug.Log($"已创建标签: {toolTag}");
+            }
+
+            currentToolInstance.tag = toolTag;
 
             if (debugMode)
                 Debug.Log($"✅ 装备工具: {newTool.toolName}");
@@ -326,6 +337,9 @@ public class ToolSystem : MonoBehaviour
 
         currentToolInstance = tempTool;
         originalToolScale = tempTool.transform.localScale;
+
+        // 设置临时工具的标签
+        currentToolInstance.tag = "Tool";
     }
 
     // 静默更新UI，不显示警告

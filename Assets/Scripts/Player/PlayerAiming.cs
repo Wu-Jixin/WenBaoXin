@@ -17,6 +17,9 @@ public class PlayerAiming : MonoBehaviour
     public bool showDebugRay = true;
     public Color debugRayColor = Color.red;
 
+    [Header("性能优化")]
+    [SerializeField] private float updateInterval = 0.05f; // 每秒20次更新
+
     // 事件
     public UnityEvent<GameObject> OnAimTargetChanged;
 
@@ -25,6 +28,7 @@ public class PlayerAiming : MonoBehaviour
 
     private Camera playerCamera;
     private RaycastHit lastHitInfo; // 保存最后一次命中信息
+    private float updateTimer = 0f;
 
     void Start()
     {
@@ -48,10 +52,13 @@ public class PlayerAiming : MonoBehaviour
 
     void Update()
     {
-        PerformAimDetection();
-
-        // 调试：在控制台显示当前状态
-        Debug.Log($"瞄准状态: {(currentAimedObject != null ? $"已瞄准 {currentAimedObject.name}" : "无目标")}");
+        // 使用计时器控制更新频率
+        updateTimer += Time.deltaTime;
+        if (updateTimer >= updateInterval)
+        {
+            PerformAimDetection();
+            updateTimer = 0f;
+        }
     }
 
     void PerformAimDetection()
@@ -76,7 +83,7 @@ public class PlayerAiming : MonoBehaviour
                 UpdateCrosshair(true);
                 OnAimTargetChanged?.Invoke(currentAimedObject);
 
-                // 详细的调试信息
+                // 详细的调试信息（只在变化时输出）
                 Debug.Log($"<color=green>击中对象:</color> {hitObject.name}");
                 Debug.Log($"<color=yellow>层级:</color> {LayerMask.LayerToName(hitObject.layer)}");
                 Debug.Log($"<color=cyan>距离:</color> {hit.distance:F2}米");

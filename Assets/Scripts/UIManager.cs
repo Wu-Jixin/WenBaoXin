@@ -52,8 +52,23 @@ public class UIManager : MonoBehaviour
         playerController = FindObjectOfType<PlayerController>();
         toolSystem = FindObjectOfType<ToolSystem>();
 
+        // 如果找到工具系统，监听工具切换事件
+        if (toolSystem != null)
+        {
+            toolSystem.OnToolSwitched += OnToolSwitched;
+        }
+
         // 初始更新
         UpdateAllUI();
+    }
+
+    void OnDestroy()
+    {
+        // 取消事件订阅
+        if (toolSystem != null)
+        {
+            toolSystem.OnToolSwitched -= OnToolSwitched;
+        }
     }
 
     void Update()
@@ -174,6 +189,14 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // === 事件处理 ===
+
+    void OnToolSwitched(ToolSystem.Tool newTool)
+    {
+        // 当工具切换时更新UI
+        UpdateToolUI(newTool.toolIcon, newTool.toolName);
+    }
+
     // === 公共方法 ===
 
     public void UpdateToolUI(Sprite icon, string name)
@@ -192,8 +215,8 @@ public class UIManager : MonoBehaviour
         }
         else if (toolIconImage != null)
         {
-            // 如果没有图标，隐藏图像
-            toolIconImage.color = new Color(1, 1, 1, 0);
+            // 如果没有图标，显示默认颜色
+            toolIconImage.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
         }
 
         Debug.Log($"UI更新: 当前工具 - {name}");
@@ -229,7 +252,10 @@ public class UIManager : MonoBehaviour
     {
         // 创建临时消息对象
         GameObject messageObj = new GameObject("TempMessage");
-        messageObj.transform.SetParent(GetComponentInChildren<Canvas>().transform);
+        Canvas canvas = GetComponentInChildren<Canvas>();
+        if (canvas == null) yield break;
+
+        messageObj.transform.SetParent(canvas.transform);
 
         Text messageText = messageObj.AddComponent<Text>();
         messageText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -250,11 +276,13 @@ public class UIManager : MonoBehaviour
         float fadeInTime = 0.3f;
         for (float t = 0; t < fadeInTime; t += Time.deltaTime)
         {
-            messageText.color = new Color(1, 1, 1, t / fadeInTime);
+            if (messageText != null)
+                messageText.color = new Color(1, 1, 1, t / fadeInTime);
             yield return null;
         }
 
-        messageText.color = Color.white;
+        if (messageText != null)
+            messageText.color = Color.white;
 
         // 等待
         yield return new WaitForSeconds(duration);
@@ -263,11 +291,13 @@ public class UIManager : MonoBehaviour
         float fadeOutTime = 0.3f;
         for (float t = 0; t < fadeOutTime; t += Time.deltaTime)
         {
-            messageText.color = new Color(1, 1, 1, 1 - (t / fadeOutTime));
+            if (messageText != null)
+                messageText.color = new Color(1, 1, 1, 1 - (t / fadeOutTime));
             yield return null;
         }
 
-        Destroy(messageObj);
+        if (messageObj != null)
+            Destroy(messageObj);
     }
 
     // === 私有方法 ===
@@ -311,7 +341,8 @@ public class UIManager : MonoBehaviour
         {
             bool isActive = playerStatusText.gameObject.activeSelf;
             playerStatusText.gameObject.SetActive(!isActive);
-            toolDisplayText.gameObject.SetActive(!isActive);
+            if (toolDisplayText != null)
+                toolDisplayText.gameObject.SetActive(!isActive);
 
             Debug.Log($"UI显示: {!isActive}");
         }
@@ -331,13 +362,13 @@ public class UIManager : MonoBehaviour
                 DestroyImmediate(child.gameObject);
             }
         }
-        
+
         // 重新创建
         CreateUIElementsIfNeeded();
-        
+
         Debug.Log("✅ UI已重置");
     }
-    
+
     [ContextMenu("测试UI更新")]
     void TestUIUpdate()
     {
