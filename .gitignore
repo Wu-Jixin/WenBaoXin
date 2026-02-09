@@ -35,3 +35,67 @@ ExportedObj/
 
 # 缓存文件
 *.dcache
+
+# ========== 【新增】美术资源与3D建模源文件 ==========
+# Blender 自动备份文件（非常重要！）
+*.blend1
+*.blend2
+*.blend3
+
+# Blender 缓存和临时文件
+__pycache__/
+*.pyc
+
+# Substance Painter 项目文件
+*.spp
+*.spp.toc
+
+# ZBrush 临时文件
+*.ztmp
+*.zbp
+
+# 其他常见3D/2D软件临时文件
+*.max
+*.mb
+*.ma
+*.c4d
+*.hip
+*.hipnc
+*.psd
+*.ai
+# 注意：如果需要跟踪PSD/AI，请移除或改用LFS
+
+# ========== 【新增】团队协作与工作流 ==========
+# 建议的工作临时目录（建模师可存放未完成的导出文件）
+/_WorkInProgress/
+/Export_Temp/
+
+# 大型原始资源目录（建议用网盘或单独仓库管理原始素材）
+/RawAssets/
+/SourceFiles/
+
+# ========== 【新增】操作系统文件 ==========
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+*.stackdump
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ========== 【新增】日志与缓存 ==========
+*.log
+*.tmp
+*.cache
+node_modules/
