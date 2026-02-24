@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7034323394352454768}
   - component: {fileID: 8282349417313935654}
   - component: {fileID: 6548215574554346216}
+  - component: {fileID: 8146684166078276656}
   m_Layer: 0
   m_Name: "Test_\u6BDB\u5237"
   m_TagString: Untagged
@@ -107,3 +108,23 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8146684166078276656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6577467114978908818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93934e68b9384ae4ea25f04fb52ffd22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings:
+    toolName: "\u6BDB\u5237"
+    damage: 10
+    attackRange: 1.5
+    attackCooldown: 0.3
+    attackKey: 323
+  toolTransform: {fileID: 2934436263608401945}
+  playerCamera: {fileID: 0}

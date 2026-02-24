@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI; // 添加这个命名空间
+using UnityEngine.UI;
 
 public class PlayerAiming : MonoBehaviour
 {
@@ -45,8 +45,12 @@ public class PlayerAiming : MonoBehaviour
         }
         else
         {
-            // 确保准心初始为默认颜色
-            UpdateCrosshair(false);
+            // 确保准心初始为白色（由VisualFeedbackUI控制）
+            var image = crosshairUI.GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = Color.white; // 强制设为白色
+            }
         }
     }
 
@@ -108,15 +112,23 @@ public class PlayerAiming : MonoBehaviour
         }
     }
 
+    // ========== 修改后的 UpdateCrosshair 方法 ==========
     void UpdateCrosshair(bool canInteract)
     {
-        if (crosshairUI != null)
+        // 注释掉这部分，让VisualFeedbackUI完全控制准心
+        // if (crosshairUI != null)
+        // {
+        //     var image = crosshairUI.GetComponent<Image>();
+        //     if (image != null)
+        //     {
+        //         image.color = canInteract ? canInteractColor : defaultColor;
+        //     }
+        // }
+
+        // 只保留调试日志
+        if (canInteract)
         {
-            var image = crosshairUI.GetComponent<Image>();
-            if (image != null)
-            {
-                image.color = canInteract ? canInteractColor : defaultColor;
-            }
+            Debug.Log("瞄准可交互对象，但准心由VisualFeedbackUI控制");
         }
     }
 
