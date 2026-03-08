@@ -1,181 +1,51 @@
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class PlayerAiming : MonoBehaviour
 {
-    [Header("Ãé×¼ÉèÖÃ")]
-    public float maxAimDistance = 5f;
-    public LayerMask aimLayerMask;
-
-    [Header("×¼ĞÄ·´À¡")]
-    public GameObject crosshairUI;
-    public Color defaultColor = Color.white;
-    public Color canInteractColor = Color.green;
-
-    [Header("µ÷ÊÔÑ¡Ïî")]
-    public bool showDebugRay = true;
-    public Color debugRayColor = Color.red;
-
-    [Header("ĞÔÄÜÓÅ»¯")]
-    [SerializeField] private float updateInterval = 0.05f; // Ã¿Ãë20´Î¸üĞÂ
-
-    // ÊÂ¼ş
-    public UnityEvent<GameObject> OnAimTargetChanged;
-
-    // Ìí¼ÓÒ»¸ö¹«¹²×Ö¶Î£¬·½±ã²âÊÔÊ±²é¿´µ±Ç°Ä¿±ê
-    [HideInInspector] public GameObject currentAimedObject;
-
-    private Camera playerCamera;
-    private RaycastHit lastHitInfo; // ±£´æ×îºóÒ»´ÎÃüÖĞĞÅÏ¢
-    private float updateTimer = 0f;
+    [Header("å‡†å¿ƒç»‘å®š")]
+    public GameObject crosshairUI; // Inspector æ‹– Crosshair GameObject
 
     void Start()
     {
-        playerCamera = GetComponentInChildren<Camera>();
-        if (playerCamera == null && Camera.main != null)
+        // è‡ªåŠ¨åŒæ­¥å‡†å¿ƒåˆ° VisualFeedbackUI
+        if (crosshairUI != null)
         {
-            playerCamera = Camera.main;
-            Debug.Log("Ê¹ÓÃÖ÷ÉãÏñ»ú×÷ÎªÃé×¼ÉãÏñ»ú");
-        }
-
-        if (crosshairUI == null)
-        {
-            Debug.LogWarning("×¼ĞÄUIÎ´¸³Öµ£¬ÇëÔÚInspectorÖĞ¹ØÁª¡£");
+            Image img = crosshairUI.GetComponent<Image>();
+            if (VisualFeedbackUI.Instance != null && img != null)
+            {
+                VisualFeedbackUI.Instance.crosshair = img;
+                Debug.Log("âœ… å·²åŒæ­¥å‡†å¿ƒåˆ° VisualFeedbackUI");
+            }
         }
         else
         {
-            // È·±£×¼ĞÄ³õÊ¼Îª°×É«£¨ÓÉVisualFeedbackUI¿ØÖÆ£©
-            var image = crosshairUI.GetComponent<Image>();
-            if (image != null)
-            {
-                image.color = Color.white; // Ç¿ÖÆÉèÎª°×É«
-            }
+            Debug.LogWarning("âš ï¸ PlayerAiming: crosshairUI æœªç»‘å®šï¼");
         }
     }
 
     void Update()
     {
-        // Ê¹ÓÃ¼ÆÊ±Æ÷¿ØÖÆ¸üĞÂÆµÂÊ
-        updateTimer += Time.deltaTime;
-        if (updateTimer >= updateInterval)
+        // =======================
+        // æµ‹è¯•å‡†å¿ƒåé¦ˆï¼ˆå®‰å…¨é”®ä½ï¼Œä¸å†²çªï¼‰
+        // Z -> Hit, X -> Miss, C -> Cooldown
+        // =======================
+        if (Input.GetKeyDown(KeyCode.Z))
         {
-            PerformAimDetection();
-            updateTimer = 0f;
-        }
-    }
-
-    void PerformAimDetection()
-    {
-        if (playerCamera == null)
-        {
-            Debug.LogError("PlayerAiming: Î´ÕÒµ½ÉãÏñ»ú£¡");
-            return;
+            VisualFeedbackUI.Instance?.ShowHitFeedback();
+            Debug.Log("å‡†å¿ƒå‘½ä¸­æ•ˆæœè§¦å‘ (Z)");
         }
 
-        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, maxAimDistance, aimLayerMask))
+        if (Input.GetKeyDown(KeyCode.X))
         {
-            GameObject hitObject = hit.collider.gameObject;
-
-            if (currentAimedObject != hitObject)
-            {
-                currentAimedObject = hitObject;
-                lastHitInfo = hit; // ±£´æÃüÖĞĞÅÏ¢
-                UpdateCrosshair(true);
-                OnAimTargetChanged?.Invoke(currentAimedObject);
-
-                // ÏêÏ¸µÄµ÷ÊÔĞÅÏ¢£¨Ö»ÔÚ±ä»¯Ê±Êä³ö£©
-                Debug.Log($"<color=green>»÷ÖĞ¶ÔÏó:</color> {hitObject.name}");
-                Debug.Log($"<color=yellow>²ã¼¶:</color> {LayerMask.LayerToName(hitObject.layer)}");
-                Debug.Log($"<color=cyan>¾àÀë:</color> {hit.distance:F2}Ã×");
-            }
-        }
-        else
-        {
-            if (currentAimedObject != null)
-            {
-                currentAimedObject = null;
-                UpdateCrosshair(false);
-                OnAimTargetChanged?.Invoke(null);
-            }
+            VisualFeedbackUI.Instance?.ShowMissFeedback();
+            Debug.Log("å‡†å¿ƒæœªå‘½ä¸­æ•ˆæœè§¦å‘ (X)");
         }
 
-        // µ÷ÊÔÉäÏß
-        if (showDebugRay)
+        if (Input.GetKeyDown(KeyCode.C))
         {
-            Color rayColor = (currentAimedObject != null) ? Color.green : debugRayColor;
-            float rayLength = (currentAimedObject != null) ? lastHitInfo.distance : maxAimDistance;
-            Debug.DrawRay(ray.origin, ray.direction * rayLength, rayColor);
+            VisualFeedbackUI.Instance?.ShowCooldownFeedback(0.5f);
+            Debug.Log("å‡†å¿ƒå†·å´æ•ˆæœè§¦å‘ (C)");
         }
-    }
-
-    // ========== ĞŞ¸ÄºóµÄ UpdateCrosshair ·½·¨ ==========
-    void UpdateCrosshair(bool canInteract)
-    {
-        // ×¢ÊÍµôÕâ²¿·Ö£¬ÈÃVisualFeedbackUIÍêÈ«¿ØÖÆ×¼ĞÄ
-        // if (crosshairUI != null)
-        // {
-        //     var image = crosshairUI.GetComponent<Image>();
-        //     if (image != null)
-        //     {
-        //         image.color = canInteract ? canInteractColor : defaultColor;
-        //     }
-        // }
-
-        // Ö»±£Áôµ÷ÊÔÈÕÖ¾
-        if (canInteract)
-        {
-            Debug.Log("Ãé×¼¿É½»»¥¶ÔÏó£¬µ«×¼ĞÄÓÉVisualFeedbackUI¿ØÖÆ");
-        }
-    }
-
-    public GameObject GetCurrentAimedObject()
-    {
-        return currentAimedObject;
-    }
-
-    public bool GetAimHitInfo(out RaycastHit hitInfo)
-    {
-        hitInfo = lastHitInfo;
-        return currentAimedObject != null;
-    }
-
-    // === ĞÂÔöµÄ²âÊÔ·½·¨ ===
-
-    // ·½·¨1£ºÊÖ¶¯²âÊÔ×¼ĞÄÑÕÉ«ÇĞ»»
-    public void ToggleCrosshairForTest()
-    {
-        if (crosshairUI != null)
-        {
-            var image = crosshairUI.GetComponent<Image>();
-            if (image != null)
-            {
-                image.color = (image.color == defaultColor) ? canInteractColor : defaultColor;
-                Debug.Log($"ÊÖ¶¯ÇĞ»»×¼ĞÄÑÕÉ«: {image.color}");
-            }
-        }
-    }
-
-    // ·½·¨2£º»ñÈ¡µ±Ç°ÉäÏßĞÅÏ¢
-    public string GetAimDebugInfo()
-    {
-        if (currentAimedObject != null)
-        {
-            return $"Ä¿±ê: {currentAimedObject.name}\n" +
-                   $"²ã¼¶: {LayerMask.LayerToName(currentAimedObject.layer)}\n" +
-                   $"¾àÀë: {lastHitInfo.distance:F2}Ã×";
-        }
-        return "ÎŞÃé×¼Ä¿±ê";
-    }
-
-    // ·½·¨3£ºÁÙÊ±¸ü¸Ä×î´ó¾àÀë£¨²âÊÔÓÃ£©
-    public void SetMaxDistanceForTest(float newDistance)
-    {
-        float oldDistance = maxAimDistance;
-        maxAimDistance = newDistance;
-        Debug.Log($"×î´óÃé×¼¾àÀë´Ó {oldDistance} ¸ÄÎª {newDistance}");
     }
 }

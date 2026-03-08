@@ -702,26 +702,26 @@ public class ToolSystem : MonoBehaviour
     }
 
     // 简单的GUI显示
-    void OnGUI()
-    {
-        if (!debugMode || !Application.isPlaying) return;
+    //void OnGUI()
+    //{
+        //if (!debugMode || !Application.isPlaying) return;
 
-        GUIStyle style = new GUIStyle(GUI.skin.label);
-        style.fontSize = 14;
-        style.normal.textColor = Color.yellow;
+        //GUIStyle style = new GUIStyle(GUI.skin.label);
+        //style.fontSize = 14;
+        //style.normal.textColor = Color.yellow;
 
-        Tool current = GetCurrentTool();
-        if (current != null)
-        {
-            string toolInfo = $"当前工具: {current.toolName} (按{current.hotkey})";
+        //Tool current = GetCurrentTool();
+        //if (current != null)
+        //{
+            //string toolInfo = $"当前工具: {current.toolName} (按{current.hotkey})";
 
             // 右上角显示工具信息
-            float width = 300;
-            float x = Screen.width - width - 10;
-            float y = 10;
+            //float width = 300;
+            //float x = Screen.width - width - 10;
+            //float y = 10;
 
-            GUI.Label(new Rect(x, y, width, 30), toolInfo, style);
-            GUI.Label(new Rect(x, y + 25, width, 30), "鼠标滚轮切换 | Q键上一个工具", style);
-        }
-    }
+            //GUI.Label(new Rect(x, y, width, 30), toolInfo, style);
+            //GUI.Label(new Rect(x, y + 25, width, 30), "鼠标滚轮切换 | Q键上一个工具", style);
+        //}
+    //}
 }

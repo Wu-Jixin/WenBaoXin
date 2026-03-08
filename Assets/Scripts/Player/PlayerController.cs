@@ -567,34 +567,34 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
-        GUILayout.BeginArea(new Rect(10, 10, 300, 250));
+    //void OnGUI()
+    //{
+       // GUILayout.BeginArea(new Rect(10, 10, 300, 250));
 
-        GUILayout.Label($"=== 玩家状态 ===");
-        GUILayout.Label($"位置: {playerTransform.position:F2}");
-        GUILayout.Label($"状态: {(isGrounded ? "在地面" : "在空中")}");
-        GUILayout.Label($"姿势: {GetPostureDescription()}");
-        GUILayout.Label($"蹲下状态: {crouchState}");
-        GUILayout.Label($"高度: {currentHeight:F2}");
-        GUILayout.Label($"水平速度: {new Vector3(velocity.x, 0, velocity.z).magnitude:F2} m/s");
-        GUILayout.Label($"垂直速度: {velocity.y:F2}");
-        GUILayout.Label($"体力: {currentStamina:F0}/{maxStamina}");
-        GUILayout.Label($"工具: {(hasToolEquipped ? currentTool.name : "无")}");
+        //GUILayout.Label($"=== 玩家状态 ===");
+        //GUILayout.Label($"位置: {playerTransform.position:F2}");
+        //GUILayout.Label($"状态: {(isGrounded ? "在地面" : "在空中")}");
+        //GUILayout.Label($"姿势: {GetPostureDescription()}");
+        //GUILayout.Label($"蹲下状态: {crouchState}");
+        //GUILayout.Label($"高度: {currentHeight:F2}");
+        //GUILayout.Label($"水平速度: {new Vector3(velocity.x, 0, velocity.z).magnitude:F2} m/s");
+        //GUILayout.Label($"垂直速度: {velocity.y:F2}");
+        //GUILayout.Label($"体力: {currentStamina:F0}/{maxStamina}");
+        //GUILayout.Label($"工具: {(hasToolEquipped ? currentTool.name : "无")}");
 
-        GUILayout.Label($"");
-        GUILayout.Label($"=== 控制说明 ===");
-        GUILayout.Label($"WASD: 移动");
-        GUILayout.Label($"鼠标: 视角");
-        GUILayout.Label($"左Shift: 冲刺");
-        GUILayout.Label($"左Ctrl: 蹲下/站立");
-        GUILayout.Label($"空格: 跳跃");
-        GUILayout.Label($"鼠标左键: 使用工具");
-        GUILayout.Label($"E: 使用/拾取工具");
-        GUILayout.Label($"Q: 丢弃工具");
+        //GUILayout.Label($"");
+        //GUILayout.Label($"=== 控制说明 ===");
+        //GUILayout.Label($"WASD: 移动");
+        //GUILayout.Label($"鼠标: 视角");
+        //GUILayout.Label($"左Shift: 冲刺");
+        //GUILayout.Label($"左Ctrl: 蹲下/站立");
+        //GUILayout.Label($"空格: 跳跃");
+        //GUILayout.Label($"鼠标左键: 使用工具");
+        //GUILayout.Label($"E: 使用/拾取工具");
+        //GUILayout.Label($"Q: 丢弃工具");
 
-        GUILayout.EndArea();
-    }
+       // GUILayout.EndArea();
+    //}
 
     string GetPostureDescription()
     {
