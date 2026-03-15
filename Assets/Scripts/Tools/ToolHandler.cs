@@ -1,190 +1,284 @@
 using UnityEngine;
-using LibreFracture;  // Ìí¼ÓLibreFractureÃüÃû¿Õ¼ä
+using LibreFracture;
 
 public class ToolHandler : MonoBehaviour
 {
     [System.Serializable]
     public class ToolSettings
     {
-        public string toolName = "ÂåÑô²ù";
-        public float damage = 30f;
+        public string toolName = "Tool";
         public float attackRange = 2f;
         public float attackCooldown = 0.5f;
-        public KeyCode attackKey = KeyCode.Mouse0;
+        public KeyCode attackKey = KeyCode.Mouse1;
     }
 
+    [Header("å·¥å…·è®¾ç½®")]
     public ToolSettings settings;
-    public Transform toolTransform;
+
+    [Header("å¼•ç”¨")]
     public Camera playerCamera;
 
     private bool canAttack = true;
     private float lastAttackTime;
+
+    private ToolItem toolItem;
 
     void Start()
     {
         if (playerCamera == null)
             playerCamera = Camera.main;
 
-        Debug.Log($"ToolHandler ³õÊ¼»¯: {settings.toolName}");
+        toolItem = GetComponent<ToolItem>();
+
+        Debug.Log("ToolHandler åˆå§‹åŒ–ï¼š" + settings.toolName);
     }
 
     void Update()
     {
-        // ÀäÈ´¼ì²é
+        if (Input.GetKeyDown(settings.attackKey))
+        {
+            TriggerAttack();
+        }
+
+        HandleCooldown();
+    }
+
+    void HandleCooldown()
+    {
         if (!canAttack && Time.time - lastAttackTime > settings.attackCooldown)
         {
             canAttack = true;
-            Debug.Log($"¹¤¾ß {settings.toolName} ÀäÈ´½áÊø");
         }
     }
 
-    // Õâ¸ö·½·¨»á±» ToolSystem µ÷ÓÃ
     public void TriggerAttack()
     {
-        Debug.Log($"TriggerAttack ±»µ÷ÓÃ, canAttack={canAttack}");
-
-        if (!canAttack)
-        {
-            Debug.Log("¹¤¾ßÀäÈ´ÖĞ");
-            if (VisualFeedbackUI.Instance != null)
-                VisualFeedbackUI.Instance.ShowCooldownFeedback(GetRemainingCooldown());
-            return;
-        }
+        if (!canAttack) return;
 
         canAttack = false;
         lastAttackTime = Time.time;
 
-        Debug.Log($"Ö´ĞĞ¹¥»÷: {settings.toolName}, ÉËº¦={settings.damage}");
+        ToolType type = ToolType.None;
+
+        if (toolItem != null)
+            type = toolItem.GetToolType();
 
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, settings.attackRange))
         {
-            // ĞŞ¸´£ºÊ¹ÓÃ hit.collider.gameObject.layer ¶ø²»ÊÇ hit.collider.layer
-            Debug.Log($"ÉäÏß»÷ÖĞ: {hit.collider.name}, ±êÇ©: {hit.collider.tag}, ²ã¼¶: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+            Debug.Log("å‘½ä¸­ç‰©ä½“ï¼š" + hit.collider.name);
 
-            // === ÆÆËéºËĞÄÂß¼­ ===
+            HandleToolAction(type, hit);
+        }
+        else
+        {
+            Debug.Log("æœªå‘½ä¸­ç‰©ä½“");
+        }
+    }
 
-            // 1. ÏÈÕÒ ChunkGraphManager£¨Ö÷ÎïÌå£©
-            ChunkGraphManager manager = hit.collider.GetComponentInParent<ChunkGraphManager>();
-            if (manager != null)
+    // ================================
+    // å·¥å…·è¡Œä¸ºæ§åˆ¶
+    // ================================
+
+    void HandleToolAction(ToolType type, RaycastHit hit)
+    {
+        switch (type)
+        {
+            case ToolType.Brush:
+                UseBrush(hit);
+                break;
+
+            case ToolType.Shovel:
+                UseShovel(hit);
+                break;
+
+            case ToolType.Spade:
+                UseSpade(hit);
+                break;
+
+            case ToolType.Tweezers:
+                UseTweezers(hit);
+                break;
+
+            case ToolType.Glue:
+                UseGlue(hit);
+                break;
+
+            case ToolType.Scanner:
+                UseScanner(hit);
+                break;
+
+            default:
+                Debug.Log("æœªçŸ¥å·¥å…·");
+                break;
+        }
+    }
+
+    // ================================
+    // æ¯›åˆ·
+    // ================================
+
+    void UseBrush(RaycastHit hit)
+    {
+        if (hit.collider.CompareTag("Soil"))
+        {
+            Debug.Log("æ¯›åˆ·æ­£åœ¨æ¸…ç†åœŸå±‚");
+
+            Renderer r = hit.collider.GetComponent<Renderer>();
+
+            if (r != null)
             {
-                Debug.Log($"ÕÒµ½ ChunkGraphManager: {manager.name}");
+                Color c = r.material.color;
+                c.a -= 0.2f;
+                r.material.color = c;
 
-                // 2. ÕÒµ½ËùÓĞ ChunkNode
-                ChunkNode[] chunks = manager.GetComponentsInChildren<ChunkNode>();
-                Debug.Log($"ÕÒµ½ {chunks.Length} ¸öËéÆ¬");
-
-                // 3. ¸øËùÓĞËéÆ¬Ê©¼ÓÁ¦£¨Ä£ÄâÆÆËé£©
-                foreach (ChunkNode chunk in chunks)
+                if (c.a <= 0.1f)
                 {
-                    Rigidbody rb = chunk.GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        // ÈÃËéÆ¬´Ó»÷ÖĞµãÏòÍâ·ÉÉ¢
-                        Vector3 forceDir = (chunk.transform.position - hit.point).normalized;
-                        rb.isKinematic = false;
-                        rb.useGravity = true;
-                        rb.AddForce(forceDir * 15f + Vector3.up * 8f, ForceMode.Impulse);
-                        rb.AddTorque(Random.insideUnitSphere * 8f, ForceMode.Impulse);
-
-                        Debug.Log($"¸øËéÆ¬ {chunk.name} Ê©¼ÓÁ¦: {forceDir}");
-
-                        // ¶Ï¿ªÁ¬½Ó£¨Èç¹ûÓĞ Joint£©
-                        Joint joint = chunk.GetComponent<Joint>();
-                        if (joint != null)
-                        {
-                            Destroy(joint);
-                            Debug.Log($"Ïú»Ù Joint: {joint.name}");
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"ËéÆ¬ {chunk.name} Ã»ÓĞ Rigidbody");
-                    }
+                    Destroy(hit.collider.gameObject);
+                    Debug.Log("åœŸå±‚æ¸…ç†å®Œæˆ");
                 }
-
-                // 4. Òş²ØÖ÷ÎïÌå
-                manager.gameObject.SetActive(false);
-                Debug.Log("Ö÷ÎïÌåÒÑÒş²Ø");
-
-                // 5. ´¥·¢½ÌÓı±¨¸æ
-                if (LossReportSystem.Instance != null)
-                {
-                    LossReportSystem.Instance.ShowReport("Tomb_Wall");
-                    Debug.Log("´¥·¢½ÌÓı±¨¸æ");
-                }
-            }
-            else
-            {
-                Debug.Log("Î´ÕÒµ½ ChunkGraphManager£¬³¢ÊÔÕÒµ¥¸ö ChunkNode");
-
-                // ³¢ÊÔÕÒµ¥¸ö ChunkNode£¨Èç¹ûÊÇÖ±½Ó¹¥»÷ËéÆ¬£©
-                ChunkNode node = hit.collider.GetComponent<ChunkNode>();
-                if (node != null)
-                {
-                    Debug.Log($"ÕÒµ½ ChunkNode: {node.name}");
-                    Rigidbody rb = node.GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        Vector3 forceDir = (node.transform.position - hit.point).normalized;
-                        rb.isKinematic = false;
-                        rb.useGravity = true;
-                        rb.AddForce(forceDir * 15f + Vector3.up * 8f, ForceMode.Impulse);
-                        rb.AddTorque(Random.insideUnitSphere * 8f, ForceMode.Impulse);
-
-                        // ¶Ï¿ªÁ¬½Ó
-                        Joint joint = node.GetComponent<Joint>();
-                        if (joint != null) Destroy(joint);
-                    }
-                }
-            }
-
-            // ÊÓ¾õ·´À¡
-            if (VisualFeedbackUI.Instance != null)
-            {
-                VisualFeedbackUI.Instance.ShowHitFeedback();
-                VisualFeedbackUI.Instance.ShakeCamera(1f);
-                VisualFeedbackUI.Instance.ShowDamageNumber(hit.point, settings.damage);
-                Debug.Log("´¥·¢ÊÓ¾õ·´À¡");
             }
         }
         else
         {
-            Debug.Log("ÉäÏßÎ´»÷ÖĞÈÎºÎÎïÌå");
-
-            if (VisualFeedbackUI.Instance != null)
-            {
-                VisualFeedbackUI.Instance.ShowMissFeedback();
-                Debug.Log("´¥·¢Î´ÃüÖĞ·´À¡");
-            }
+            Debug.Log("æ¯›åˆ·åªèƒ½æ¸…ç†åœŸå±‚");
         }
     }
 
-    // ÊÖ¶¯´¥·¢¹¥»÷£¨ÓÃÓÚ²âÊÔ£©
-    public void TestAttack()
+    // ================================
+    // æ´›é˜³é“²
+    // ================================
+
+    void UseShovel(RaycastHit hit)
     {
-        Debug.Log("²âÊÔ¹¥»÷");
-        TriggerAttack();
+        if (hit.collider.CompareTag("Soil"))
+        {
+            Debug.Log("æ´›é˜³é“²æŒ–æ˜åœŸå±‚");
+
+            BreakObject(hit);
+        }
+        else
+        {
+            Debug.Log("æ´›é˜³é“²åªèƒ½æŒ–åœŸ");
+        }
     }
 
-    public bool CanAttack() => canAttack;
+    // ================================
+    // é“é”¹
+    // ================================
 
-    public string GetToolName() => settings.toolName;
-
-    public float GetRemainingCooldown()
+    void UseSpade(RaycastHit hit)
     {
-        if (canAttack) return 0f;
-        float remaining = settings.attackCooldown - (Time.time - lastAttackTime);
-        return Mathf.Max(0f, remaining);
+        if (hit.collider.CompareTag("Breakable"))
+        {
+            Debug.Log("é“é”¹ç ´åå¢™ä½“");
+
+            BreakObject(hit);
+        }
+        else
+        {
+            Debug.Log("é“é”¹å¯¹è¯¥ç‰©ä½“æ— æ•ˆ");
+        }
     }
 
-    // ÖØÖÃÀäÈ´£¨ÓÃÓÚµ÷ÊÔ£©
-    public void ResetCooldown()
+    // ================================
+    // é•Šå­
+    // ================================
+
+    void UseTweezers(RaycastHit hit)
     {
-        canAttack = true;
-        lastAttackTime = 0f;
-        Debug.Log("ÀäÈ´ÒÑÖØÖÃ");
+        if (hit.collider.CompareTag("Artifact"))
+        {
+            Debug.Log("ä½¿ç”¨é•Šå­æ‹¾å–æ–‡ç‰©");
+
+            hit.collider.gameObject.SetActive(false);
+
+            if (VisualFeedbackUI.Instance != null)
+                VisualFeedbackUI.Instance.ShowHitFeedback();
+        }
+        else
+        {
+            Debug.Log("é•Šå­åªèƒ½æ‹¾å–æ–‡ç‰©");
+        }
+    }
+
+    // ================================
+    // ä¿®å¤èƒ¶
+    // ================================
+
+    void UseGlue(RaycastHit hit)
+    {
+        if (hit.collider.CompareTag("BrokenArtifact"))
+        {
+            Debug.Log("ä¿®å¤æ–‡ç‰©");
+
+            hit.collider.tag = "Artifact";
+
+            Renderer r = hit.collider.GetComponent<Renderer>();
+            if (r != null)
+                r.material.color = Color.white;
+        }
+        else
+        {
+            Debug.Log("æ²¡æœ‰éœ€è¦ä¿®å¤çš„æ–‡ç‰©");
+        }
+    }
+
+    // ================================
+    // æ‰«æä»ª
+    // ================================
+
+    void UseScanner(RaycastHit hit)
+    {
+        if (hit.collider.CompareTag("Artifact"))
+        {
+            Debug.Log("æ‰«ææ–‡ç‰©ä¿¡æ¯");
+
+            if (GuidanceManager.Instance != null)
+            {
+                GuidanceManager.Instance.ShowGuidance(
+                    "æ£€æµ‹åˆ°æ–‡ç‰©ï¼šæ±‰ä»£é™¶ç½\nå»ºè®®ä½¿ç”¨æ¯›åˆ·æ¸…ç†å‘¨å›´åœŸå±‚"
+                );
+            }
+        }
+        else
+        {
+            Debug.Log("æ‰«ææœªå‘ç°æ–‡ç‰©");
+        }
+    }
+
+    // ================================
+    // LibreFractureç ´å
+    // ================================
+
+    void BreakObject(RaycastHit hit)
+    {
+        ChunkGraphManager manager = hit.collider.GetComponentInParent<ChunkGraphManager>();
+
+        if (manager != null)
+        {
+            ChunkNode[] chunks = manager.GetComponentsInChildren<ChunkNode>();
+
+            foreach (ChunkNode chunk in chunks)
+            {
+                Rigidbody rb = chunk.GetComponent<Rigidbody>();
+
+                if (rb != null)
+                {
+                    Vector3 dir = (chunk.transform.position - hit.point).normalized;
+
+                    rb.isKinematic = false;
+                    rb.useGravity = true;
+
+                    rb.AddForce(dir * 15f + Vector3.up * 8f, ForceMode.Impulse);
+                }
+            }
+
+            manager.gameObject.SetActive(false);
+
+            Debug.Log("ç ´ç¢å®Œæˆ");
+        }
     }
 }

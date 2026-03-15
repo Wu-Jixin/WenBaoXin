@@ -6,6 +6,15 @@ using UnityEngine.UI;
 
 public class ToolSystem : MonoBehaviour
 {
+    // ========== 新增：工具类型枚举 ==========
+    public enum ToolType
+    {
+        None,       // 无工具
+        Shovel,     // 洛阳铲/铁锹
+        Brush,      // 毛刷
+        Scanner     // 扫描仪（如果需要）
+    }
+
     [System.Serializable]
     public class Tool
     {
@@ -15,6 +24,8 @@ public class ToolSystem : MonoBehaviour
         public float damageRadius = 0.2f; // 破坏半径
         public float damageForce = 10f;  // 破坏力度
         public KeyCode hotkey;           // 快捷键
+        // ========== 新增：工具类型 ==========
+        public ToolType toolType = ToolType.None;
     }
 
     [Header("工具列表")]
@@ -33,6 +44,9 @@ public class ToolSystem : MonoBehaviour
     private int currentToolIndex = 0;
     private GameObject currentToolInstance;
     private Vector3 originalToolScale = Vector3.one;
+
+    // ========== 新增：当前工具类型（供其他系统访问）==========
+    public ToolType currentToolType = ToolType.None;
 
     // 事件：工具切换时触发
     public delegate void ToolSwitchedHandler(Tool newTool);
@@ -277,10 +291,19 @@ public class ToolSystem : MonoBehaviour
         currentToolIndex = index;
         Tool newTool = tools[currentToolIndex];
 
+        // ========== 新增：更新当前工具类型 ==========
+        currentToolType = newTool.toolType;
+
         // 实例化新工具
         if (newTool.toolPrefab != null && toolHolder != null)
         {
             currentToolInstance = Instantiate(newTool.toolPrefab, toolHolder);
+            ToolItem item = currentToolInstance.GetComponent<ToolItem>();
+
+            if (item != null)
+            {
+                Debug.Log("装备工具类型: " + item.toolType);
+            }
             currentToolInstance.transform.localPosition = Vector3.zero;
             currentToolInstance.transform.localRotation = Quaternion.identity;
 
@@ -304,7 +327,7 @@ public class ToolSystem : MonoBehaviour
             }
 
             if (debugMode)
-                Debug.Log($"✅ 装备工具: {newTool.toolName}");
+                Debug.Log($"✅ 装备工具: {newTool.toolName} (类型: {newTool.toolType})");
         }
         else
         {
@@ -324,7 +347,7 @@ public class ToolSystem : MonoBehaviour
         // 调试信息
         if (debugMode)
         {
-            Debug.Log($"🔄 工具切换完成: 索引={index}, 名称={newTool.toolName}");
+            Debug.Log($"🔄 工具切换完成: 索引={index}, 名称={newTool.toolName}, 类型={newTool.toolType}");
         }
     }
 
@@ -337,16 +360,22 @@ public class ToolSystem : MonoBehaviour
         {
             tempTool = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             tempTool.transform.localScale = new Vector3(0.1f, 0.5f, 0.1f);
+            // ========== 新增：设置临时工具类型 ==========
+            currentToolType = ToolType.Shovel;
         }
         else if (toolName.Contains("铁锹"))
         {
             tempTool = GameObject.CreatePrimitive(PrimitiveType.Cube);
             tempTool.transform.localScale = new Vector3(0.3f, 0.05f, 0.2f);
+            // ========== 新增：设置临时工具类型 ==========
+            currentToolType = ToolType.Shovel;
         }
         else // 毛刷
         {
             tempTool = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             tempTool.transform.localScale = new Vector3(0.05f, 0.2f, 0.05f);
+            // ========== 新增：设置临时工具类型 ==========
+            currentToolType = ToolType.Brush;
         }
 
         tempTool.transform.SetParent(toolHolder);
@@ -449,6 +478,18 @@ public class ToolSystem : MonoBehaviour
         return currentToolInstance;
     }
 
+    // ========== 新增：获取当前工具类型 ==========
+    public ToolType GetCurrentToolType()
+    {
+        return currentToolType;
+    }
+
+    // ========== 新增：检查是否是特定工具 ==========
+    public bool IsCurrentTool(ToolType toolType)
+    {
+        return currentToolType == toolType;
+    }
+
     // ========== 编辑器辅助功能 ==========
 
     [ContextMenu("一键配置所有工具")]
@@ -469,7 +510,7 @@ public class ToolSystem : MonoBehaviour
         GameObject spadePrefab = LoadPrefab("Test_铁锹");
         GameObject brushPrefab = LoadPrefab("Test_毛刷");
 
-        // 4. 配置工具列表
+        // 4. 配置工具列表（添加工具类型）
         if (shovelPrefab != null)
         {
             tools.Add(new Tool()
@@ -478,9 +519,10 @@ public class ToolSystem : MonoBehaviour
                 toolPrefab = shovelPrefab,
                 damageRadius = 0.15f,
                 damageForce = 8f,
-                hotkey = KeyCode.Alpha1
+                hotkey = KeyCode.Alpha1,
+                toolType = ToolType.Shovel    // 设置工具类型
             });
-            Debug.Log("✅ 配置洛阳铲");
+            Debug.Log("✅ 配置洛阳铲 (类型: Shovel)");
         }
 
         if (spadePrefab != null)
@@ -491,9 +533,10 @@ public class ToolSystem : MonoBehaviour
                 toolPrefab = spadePrefab,
                 damageRadius = 0.25f,
                 damageForce = 15f,
-                hotkey = KeyCode.Alpha2
+                hotkey = KeyCode.Alpha2,
+                toolType = ToolType.Shovel    // 设置工具类型
             });
-            Debug.Log("✅ 配置铁锹");
+            Debug.Log("✅ 配置铁锹 (类型: Shovel)");
         }
 
         if (brushPrefab != null)
@@ -504,9 +547,10 @@ public class ToolSystem : MonoBehaviour
                 toolPrefab = brushPrefab,
                 damageRadius = 0.05f,
                 damageForce = 2f,
-                hotkey = KeyCode.Alpha3
+                hotkey = KeyCode.Alpha3,
+                toolType = ToolType.Brush     // 设置工具类型
             });
-            Debug.Log("✅ 配置毛刷");
+            Debug.Log("✅ 配置毛刷 (类型: Brush)");
         }
 
         // 5. 如果没有找到预制体，创建临时工具
@@ -570,14 +614,15 @@ public class ToolSystem : MonoBehaviour
         tempBrush.transform.position = new Vector3(100, 100, 100);
         tempBrush.hideFlags = HideFlags.HideAndDontSave;
 
-        // 添加到工具列表
+        // 添加到工具列表（带工具类型）
         tools.Add(new Tool()
         {
             toolName = "洛阳铲",
             toolPrefab = null,
             damageRadius = 0.15f,
             damageForce = 8f,
-            hotkey = KeyCode.Alpha1
+            hotkey = KeyCode.Alpha1,
+            toolType = ToolType.Shovel    // 设置工具类型
         });
 
         tools.Add(new Tool()
@@ -586,7 +631,8 @@ public class ToolSystem : MonoBehaviour
             toolPrefab = null,
             damageRadius = 0.25f,
             damageForce = 15f,
-            hotkey = KeyCode.Alpha2
+            hotkey = KeyCode.Alpha2,
+            toolType = ToolType.Shovel    // 设置工具类型
         });
 
         tools.Add(new Tool()
@@ -595,7 +641,8 @@ public class ToolSystem : MonoBehaviour
             toolPrefab = null,
             damageRadius = 0.05f,
             damageForce = 2f,
-            hotkey = KeyCode.Alpha3
+            hotkey = KeyCode.Alpha3,
+            toolType = ToolType.Brush     // 设置工具类型
         });
 
         Debug.Log("✅ 紧急修复完成，现在有3个临时工具");
@@ -682,6 +729,7 @@ public class ToolSystem : MonoBehaviour
         Debug.Log("=== 工具系统当前状态 ===");
         Debug.Log($"工具总数: {tools.Count}");
         Debug.Log($"当前工具索引: {currentToolIndex}");
+        Debug.Log($"当前工具类型: {currentToolType}");
 
         Tool current = GetCurrentTool();
         if (current != null)
@@ -689,6 +737,7 @@ public class ToolSystem : MonoBehaviour
             Debug.Log($"当前工具名称: {current.toolName}");
             Debug.Log($"当前工具预制体: {current.toolPrefab}");
             Debug.Log($"当前工具快捷键: {current.hotkey}");
+            Debug.Log($"当前工具配置类型: {current.toolType}");
         }
         else
         {
@@ -700,28 +749,4 @@ public class ToolSystem : MonoBehaviour
         Debug.Log($"UIManager: {(uiManager != null ? "已连接" : "未连接")}");
         Debug.Log("========================");
     }
-
-    // 简单的GUI显示
-    //void OnGUI()
-    //{
-        //if (!debugMode || !Application.isPlaying) return;
-
-        //GUIStyle style = new GUIStyle(GUI.skin.label);
-        //style.fontSize = 14;
-        //style.normal.textColor = Color.yellow;
-
-        //Tool current = GetCurrentTool();
-        //if (current != null)
-        //{
-            //string toolInfo = $"当前工具: {current.toolName} (按{current.hotkey})";
-
-            // 右上角显示工具信息
-            //float width = 300;
-            //float x = Screen.width - width - 10;
-            //float y = 10;
-
-            //GUI.Label(new Rect(x, y, width, 30), toolInfo, style);
-            //GUI.Label(new Rect(x, y + 25, width, 30), "鼠标滚轮切换 | Q键上一个工具", style);
-        //}
-    //}
 }
