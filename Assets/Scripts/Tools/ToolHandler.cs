@@ -236,10 +236,10 @@ public class ToolHandler : MonoBehaviour
         {
             Debug.Log("扫描文物信息");
 
-            if (GuidanceManager.Instance != null)
+            if (UIManager.Instance != null)
             {
-                GuidanceManager.Instance.ShowGuidance(
-                    "检测到文物：汉代陶罐\n建议使用毛刷清理周围土层"
+                UIManager.Instance.ShowGuidance(
+                    "扫描完成\n文物：大克鼎\n时期：西周中期"
                 );
             }
         }

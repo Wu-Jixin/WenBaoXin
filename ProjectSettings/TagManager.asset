@@ -10,6 +10,7 @@ TagManager:
   - Breakable
   - Artifact
   - BrokenArtifact
+  - Diggable
   layers:
   - Default
   - TransparentFX

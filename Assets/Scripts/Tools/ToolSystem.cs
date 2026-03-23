@@ -184,13 +184,13 @@ public class ToolSystem : MonoBehaviour
 
     void HandleToolActions()
     {
-        // 工具使用动作（比如挥动）
-        if (Input.GetMouseButtonDown(0) && currentToolInstance != null) // 左键点击
+        // ✅ 正确：只触发一次
+        if (Input.GetMouseButtonDown(0) && currentToolInstance != null)
         {
             PerformToolAction();
         }
 
-        // 工具动画或效果
+        // 呼吸动画
         if (currentToolInstance != null)
         {
             AnimateCurrentTool();
@@ -199,13 +199,25 @@ public class ToolSystem : MonoBehaviour
 
     void PerformToolAction()
     {
-        // 播放工具使用动画
+        // 播放动画
         if (currentToolInstance != null)
         {
             StartCoroutine(SwingToolAnimation());
         }
 
-        // 触发工具使用事件
+        // 🔥 射线检测土层
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, 5f))
+        {
+            SoilLayer soil = hit.collider.GetComponent<SoilLayer>();
+
+            if (soil != null)
+            {
+                soil.OnDig(); // ⭐关键调用
+            }
+        }
+
+        // 调试
         Tool currentTool = GetCurrentTool();
         if (currentTool != null && debugMode)
         {

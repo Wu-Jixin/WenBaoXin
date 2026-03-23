@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class UIManager : MonoBehaviour
 
     [Header("提示文本")]
     public TMP_Text guidanceText;
+
+    // ⭐ 当前提示协程（防止闪烁）
+    private Coroutine currentGuidanceCoroutine;
 
     void Awake()
     {
@@ -34,7 +38,7 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-        // 测试提示系统
+        // ===== 测试用（可删）=====
         if (Input.GetKeyDown(KeyCode.T))
         {
             ShowGuidance("工具使用错误！");
@@ -44,17 +48,11 @@ public class UIManager : MonoBehaviour
         {
             ShowGuidance("操作正确！");
         }
-
-        if (Input.GetKeyDown(KeyCode.U))
-        {
-            HideGuidance();
-        }
     }
 
     //==============================
     // 工具UI更新
     //==============================
-
     public void UpdateToolUI(Sprite icon, string toolName)
     {
         if (toolText != null)
@@ -71,31 +69,51 @@ public class UIManager : MonoBehaviour
     }
 
     //==============================
-    // 提示系统
+    // ✅ 提示系统（稳定版，不闪）
     //==============================
 
-    public void ShowGuidance(string message)
+    public void ShowGuidance(string message, float duration = 5f)
     {
-        if (guidancePanel != null)
+        if (currentGuidanceCoroutine != null)
         {
-            guidancePanel.SetActive(true);
+            StopCoroutine(currentGuidanceCoroutine);
         }
 
-        if (guidanceText != null)
-        {
-            guidanceText.text = message;
-        }
-
-        Debug.Log("提示显示: " + message);
+        currentGuidanceCoroutine = StartCoroutine(GuidanceCoroutine(message, duration));
     }
 
-    public void HideGuidance()
+    IEnumerator GuidanceCoroutine(string message, float duration)
     {
+        if (guidancePanel != null)
+            guidancePanel.SetActive(true);
+
+        if (guidanceText != null)
+            guidanceText.text = message;
+
+        yield return new WaitForSeconds(duration);
+
+        if (guidancePanel != null)
+            guidancePanel.SetActive(false);
+
+        currentGuidanceCoroutine = null;
+    }
+
+    //==============================
+    // ❗（可选）强制关闭提示
+    //==============================
+    public void ForceHideGuidance()
+    {
+        if (currentGuidanceCoroutine != null)
+        {
+            StopCoroutine(currentGuidanceCoroutine);
+            currentGuidanceCoroutine = null;
+        }
+
         if (guidancePanel != null)
         {
             guidancePanel.SetActive(false);
         }
 
-        Debug.Log("提示关闭");
+        Debug.Log("提示被强制关闭");
     }
 }
