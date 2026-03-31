@@ -21,7 +21,7 @@ public class PlayerAiming : MonoBehaviour
 
     [Header("Scan Settings")]
     public bool enableScanning = true;
-    public KeyCode interactKey = KeyCode.E;
+    public KeyCode interactKey = KeyCode.F;
 
     private GameObject currentTarget;
     private Scannable currentScannable;
@@ -123,19 +123,19 @@ public class PlayerAiming : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactDistance))
         {
-            Scannable scannable = hit.collider.GetComponent<Scannable>();
+            Scannable scannable = hit.collider.GetComponentInParent<Scannable>();
 
             if (scannable != null)
             {
                 currentScannable = scannable;
 
-                string msg = $"发现文物：{scannable.artifactName}\n" +
-                             $"{scannable.guidanceText}\n" +
-                             $"[{interactKey}] 交互";
+                // ⭐ 改成简单提示（不再写死文物内容）
+                string msg = $"发现文物\n[{interactKey}] 扫描";
 
                 if (UIManager.Instance != null)
                     UIManager.Instance.ShowGuidance(msg);
 
+                // ⭐ 按E才真正显示文物信息
                 if (Input.GetKeyDown(interactKey))
                 {
                     OnInteractWithScannable(scannable);
@@ -145,21 +145,34 @@ public class PlayerAiming : MonoBehaviour
             }
         }
 
-        if (currentScannable != null)
-            currentScannable = null;
-
-        //if (UIManager.Instance != null)
-            //UIManager.Instance.HideGuidance();
+        currentScannable = null;
     }
 
     void OnInteractWithScannable(Scannable scannable)
     {
-        Debug.Log($"交互文物：{scannable.artifactName}");
+        Debug.Log($"扫描文物：{scannable.artifactName}");
 
-        Interactable interactable = scannable.GetComponent<Interactable>();
-        if (interactable != null)
+        // ⭐ 获取 ArtifactTag
+        ArtifactTag tag = scannable.GetComponent<ArtifactTag>();
+
+        if (tag != null)
         {
-            // interactable.OnInteract();
+            // ① 提示
+            UIManager.Instance.ShowGuidance("扫描完成！");
+
+            // ② 显示文物详细信息（核心）
+            if (LossReportSystem.Instance != null)
+            {
+                LossReportSystem.Instance.ShowReport(tag.voxelTag);
+            }
+            else
+            {
+                Debug.LogError("LossReportSystem 未找到！");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("该文物没有 ArtifactTag！");
         }
     }
 

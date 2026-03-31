@@ -39,7 +39,7 @@ public class ScanSystem : MonoBehaviour
 
         if (target == null) return;
 
-        Scannable sc = target.GetComponent<Scannable>();
+        Scannable sc = target.GetComponentInParent<Scannable>();
 
         if (sc != null)
         {
@@ -80,12 +80,38 @@ public class ScanSystem : MonoBehaviour
     {
         isScanning = false;
 
-        scanText.text =
-        "扫描完成\n" +
-        "文物：" + currentScannable.artifactName + "\n" +
-        "建议：" + currentScannable.guidanceText;
+        scanText.text = "扫描完成";
 
-        Invoke("HidePanel", 3f);
+        Debug.Log("=== 扫描完成，开始识别文物 ===");
+
+        if (currentScannable == null)
+        {
+            Debug.LogError("❌ currentScannable 是空！");
+            return;
+        }
+
+        // ⭐ 获取 ArtifactTag（用更稳的方法）
+        ArtifactTag tag = currentScannable.GetComponentInParent<ArtifactTag>();
+
+        if (tag == null)
+        {
+            Debug.LogError("❌ 没找到 ArtifactTag！");
+            return;
+        }
+
+        Debug.Log($"✅ 找到 ArtifactTag: {tag.voxelTag}");
+
+        if (LossReportSystem.Instance == null)
+        {
+            Debug.LogError("❌ LossReportSystem.Instance 是空！");
+            return;
+        }
+
+        Debug.Log("✅ 调用 ShowReport");
+
+        LossReportSystem.Instance.ShowReport(tag.voxelTag);
+
+        Invoke("HidePanel", 1.5f);
     }
 
     void HidePanel()
