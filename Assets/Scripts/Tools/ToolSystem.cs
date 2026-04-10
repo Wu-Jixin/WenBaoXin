@@ -187,7 +187,7 @@ public class ToolSystem : MonoBehaviour
         // ✅ 正确：只触发一次
         if (Input.GetMouseButtonDown(0) && currentToolInstance != null)
         {
-            PerformToolAction();
+            UseCurrentTool();
         }
 
         // 呼吸动画
@@ -425,25 +425,24 @@ public class ToolSystem : MonoBehaviour
     // 使用当前工具的方法
     public void UseCurrentTool()
     {
-        if (currentToolInstance != null)
+        if (currentToolInstance == null) return;
+
+        // ⭐⭐⭐ 1. 触发动画
+        Animator anim = currentToolInstance.GetComponent<Animator>();
+        if (anim != null)
         {
-            ToolHandler handler = currentToolInstance.GetComponent<ToolHandler>();
-            if (handler != null)
-            {
-                handler.TriggerAttack();
-                if (debugMode)
-                    Debug.Log($"触发工具攻击: {GetCurrentTool()?.toolName}");
-            }
-            else
-            {
-                if (debugMode)
-                    Debug.Log("当前工具没有ToolHandler组件，只播放动画");
-                PerformToolAction(); // 只播放动画
-            }
+            anim.SetTrigger("Use"); // 👈关键！！！
         }
-        else if (debugMode)
+
+        // ⭐⭐⭐ 2. 调用工具功能（挖土/扫描等）
+        ToolHandler handler = currentToolInstance.GetComponent<ToolHandler>();
+        if (handler != null)
         {
-            Debug.LogWarning("当前没有装备任何工具，无法使用");
+            handler.TriggerAttack();
+        }
+        else
+        {
+            Debug.LogWarning("当前工具没有ToolHandler组件");
         }
     }
 

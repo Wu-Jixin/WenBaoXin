@@ -33,14 +33,19 @@ public class ToolHandler : MonoBehaviour
         Debug.Log("ToolHandler 初始化：" + settings.toolName);
     }
 
+    //void Update()
+    //{
+    //if (Input.GetKeyDown(settings.attackKey))
+    //{
+    //TriggerAttack();
+    //}
+
+    // HandleCooldown();
+    //}
+
     void Update()
     {
-        if (Input.GetKeyDown(settings.attackKey))
-        {
-            TriggerAttack();
-        }
-
-        HandleCooldown();
+        HandleCooldown(); // 只保留冷却
     }
 
     void HandleCooldown()
