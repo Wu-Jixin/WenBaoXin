@@ -7,5 +7,7 @@ public enum ToolType
     Spade,      // 铁锹
     Tweezers,   // 镊子
     Glue,       // 修复胶
-    Scanner     // 扫描仪
+    Scanner,    // 扫描仪
+    Marker,     // 划线工具
+    Probe       // 探孔工具
 }

@@ -115,6 +115,14 @@ public class ToolHandler : MonoBehaviour
                 UseScanner(hit);
                 break;
 
+            case ToolType.Marker:
+                UseMarker(hit);
+                break;
+
+            case ToolType.Probe:
+                UseProbe(hit);
+                break;
+
             default:
                 Debug.Log("未知工具");
                 break;
@@ -284,6 +292,22 @@ public class ToolHandler : MonoBehaviour
             manager.gameObject.SetActive(false);
 
             Debug.Log("破碎完成");
+        }
+    }
+
+    void UseMarker(RaycastHit hit)
+    {
+        if (hit.collider.CompareTag("TopSoil"))
+        {
+            Debug.Log("划线工具触发（实际由MarkingSystem执行）");
+        }
+    }
+
+    void UseProbe(RaycastHit hit)
+    {
+        if (hit.collider.CompareTag("TopSoil"))
+        {
+            Debug.Log("探孔工具触发（实际由ProbeSystem执行）");
         }
     }
 }

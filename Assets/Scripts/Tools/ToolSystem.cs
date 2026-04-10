@@ -6,13 +6,18 @@ using UnityEngine.UI;
 
 public class ToolSystem : MonoBehaviour
 {
+    [Header("考古扩展系统")]
+    public MarkingSystem markingSystem;
+    public ProbeSystem probeSystem;
     // ========== 新增：工具类型枚举 ==========
     public enum ToolType
     {
         None,       // 无工具
         Shovel,     // 洛阳铲/铁锹
         Brush,      // 毛刷
-        Scanner     // 扫描仪（如果需要）
+        Scanner,    // 扫描仪（如果需要）
+        Marker,     // 划线工具
+        Probe       // 探孔工具
     }
 
     [System.Serializable]
@@ -360,6 +365,26 @@ public class ToolSystem : MonoBehaviour
         if (debugMode)
         {
             Debug.Log($"🔄 工具切换完成: 索引={index}, 名称={newTool.toolName}, 类型={newTool.toolType}");
+        }
+        // ============================
+        // ⭐控制划线 / 打孔系统
+        // ============================
+
+        if (markingSystem != null)
+            markingSystem.isActive = false;
+
+        if (probeSystem != null)
+            probeSystem.isActive = false;
+
+        if (currentToolType == ToolType.Marker)
+        {
+            if (markingSystem != null)
+                markingSystem.isActive = true;
+        }
+        else if (currentToolType == ToolType.Probe)
+        {
+            if (probeSystem != null)
+                probeSystem.isActive = true;
         }
     }
 

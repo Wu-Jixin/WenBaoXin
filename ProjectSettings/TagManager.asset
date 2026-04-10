@@ -11,6 +11,7 @@ TagManager:
   - Artifact
   - BrokenArtifact
   - Diggable
+  - TopSoil
   layers:
   - Default
   - TransparentFX
@@ -23,7 +24,7 @@ TagManager:
   - Ground
   - Interactable
   - DustLayer
-  - 
+  - Excavatable
   - 
   - 
   - 
