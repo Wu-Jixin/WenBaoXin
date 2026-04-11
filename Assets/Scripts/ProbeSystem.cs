@@ -3,6 +3,7 @@ using UnityEngine;
 public class ProbeSystem : MonoBehaviour
 {
     public bool isActive = false;
+    int probeCount = 0;
 
     [Header("探孔设置")]
     public GameObject holePrefab;
@@ -28,32 +29,73 @@ public class ProbeSystem : MonoBehaviour
             {
                 CreateHole(hit);
                 DetectResult(hit);
+
+                // ⭐ 标记为已探测
+                TopSoilController soil = hit.collider.GetComponent<TopSoilController>();
+                if (soil != null)
+                {
+                    soil.SetProbed();
+                }
             }
         }
     }
 
     void CreateHole(RaycastHit hit)
     {
-        Vector3 pos = hit.point;
+        probeCount++;
 
-        // 稍微往下压一点，避免悬浮
+        Vector3 pos = hit.point;
         pos.y -= 0.05f;
 
-        Instantiate(holePrefab, pos, Quaternion.identity);
-    }
+        GameObject hole = Instantiate(holePrefab, pos, Quaternion.identity);
 
+        // 设置名字（调试用）
+        hole.name = "ProbeHole_" + probeCount;
+
+        // ⭐ 在孔上显示编号（3D文字）
+        GameObject textObj = new GameObject("Label");
+        textObj.transform.SetParent(hole.transform);
+        textObj.transform.localPosition = new Vector3(0, 0.15f, 0);
+
+        TextMesh text = textObj.AddComponent<TextMesh>();
+        text.text = probeCount.ToString();
+        text.characterSize = 0.1f;
+        text.fontSize = 50;
+        text.anchor = TextAnchor.MiddleCenter;
+        text.alignment = TextAlignment.Center;
+    }
     void DetectResult(RaycastHit hit)
     {
-        // ⭐ 模拟探测结果（后面可以改成真实判断）
-        float random = Random.value;
+        float radius = 0.5f; // 探测范围
 
-        if (random < 0.3f)
+        Collider[] hits = Physics.OverlapSphere(hit.point, radius);
+
+        bool foundArtifact = false;
+
+        foreach (var col in hits)
         {
-            Debug.Log("🟡 探测结果：疑似文物");
+            if (col.CompareTag("Artifact"))
+            {
+                foundArtifact = true;
+                break;
+            }
         }
-        else
+
+        string resultText = foundArtifact ?
+            "探测结果：疑似文物" :
+            "探测结果：正常土层";
+
+        if (UIManager.Instance != null)
         {
-            Debug.Log("⚪ 探测结果：正常土层");
+            UIManager.Instance.ShowGuidance(resultText);
+        }
+    }
+
+    void LateUpdate()
+    {
+        foreach (TextMesh t in FindObjectsOfType<TextMesh>())
+        {
+            t.transform.rotation = Camera.main.transform.rotation;
         }
     }
 }

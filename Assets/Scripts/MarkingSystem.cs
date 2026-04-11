@@ -44,11 +44,19 @@ public class MarkingSystem : MonoBehaviour
             {
                 Vector3 point = hit.point;
 
+                // ===== 原有画线逻辑 =====
                 if (points.Count == 0 || Vector3.Distance(points[points.Count - 1], point) > 0.05f)
                 {
                     points.Add(point);
                     currentLine.positionCount = points.Count;
                     currentLine.SetPositions(points.ToArray());
+                }
+
+                // ⭐⭐⭐ 新增：标记为已划线 ⭐⭐⭐
+                TopSoilController soil = hit.collider.GetComponent<TopSoilController>();
+                if (soil != null && !soil.isMarked)
+                {
+                    soil.SetMarked();
                 }
             }
         }

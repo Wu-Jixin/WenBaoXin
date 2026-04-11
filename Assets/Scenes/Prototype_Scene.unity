@@ -950,7 +950,7 @@ Transform:
   m_GameObject: {fileID: 275212495}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -16.3, y: 29.1, z: 10.799999}
+  m_LocalPosition: {x: -8.95, y: 29.1, z: 5.89}
   m_LocalScale: {x: 0.5, y: 0.1, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1260,6 +1260,14 @@ MonoBehaviour:
     damageForce: 2
     hotkey: 55
     toolType: 4
+  - toolName: "\u624B\u94F2"
+    toolPrefab: {fileID: 3919816256002201638, guid: fb65adbdc73647343b5699716af77fe2,
+      type: 3}
+    toolIcon: {fileID: 0}
+    damageRadius: 0.05
+    damageForce: 2
+    hotkey: 56
+    toolType: 6
   toolHolder: {fileID: 0}
   uiManager: {fileID: 322682027}
   debugMode: 1
@@ -1569,6 +1577,7 @@ GameObject:
   - component: {fileID: 338118057}
   - component: {fileID: 338118056}
   - component: {fileID: 338118060}
+  - component: {fileID: 338118061}
   m_Layer: 11
   m_Name: TopSoil
   m_TagString: TopSoil
@@ -1677,6 +1686,24 @@ MonoBehaviour:
   isMarked: 0
   isProbed: 0
   allowDig: 0
+--- !u!114 &338118061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338118055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerIndex: 0
+  isUnlocked: 1
+  soilType: 0
+  nextLayer: {fileID: 1017499765}
+  removeDelay: 0.3
+  playerLift: 0.15
 --- !u!1 &378515073
 GameObject:
   m_ObjectHideFlags: 0
@@ -2089,7 +2116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 6
+  layerIndex: 7
   isUnlocked: 0
   soilType: 4
   nextLayer: {fileID: 0}
@@ -3232,6 +3259,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 34f7db27ff7886c4ba2f9b5c1a7b208f,
+        type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3638,9 +3670,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 0
-  isUnlocked: 1
-  soilType: 0
+  layerIndex: 1
+  isUnlocked: 0
+  soilType: 1
   nextLayer: {fileID: 1101824098}
   removeDelay: 0.3
   playerLift: 0.15
@@ -3780,7 +3812,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 1
+  layerIndex: 2
   isUnlocked: 0
   soilType: 1
   nextLayer: {fileID: 1289860590}
@@ -4145,9 +4177,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 2
+  layerIndex: 3
   isUnlocked: 0
-  soilType: 1
+  soilType: 2
   nextLayer: {fileID: 1883697217}
   removeDelay: 0.3
   playerLift: 0.15
@@ -4375,7 +4407,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 5
+  layerIndex: 6
   isUnlocked: 0
   soilType: 3
   nextLayer: {fileID: 521537097}
@@ -5121,7 +5153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 3
+  layerIndex: 4
   isUnlocked: 0
   soilType: 2
   nextLayer: {fileID: 2073192393}
@@ -5643,7 +5675,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448f75b9bda3f124bbedecb04cb6d515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerIndex: 4
+  layerIndex: 5
   isUnlocked: 0
   soilType: 3
   nextLayer: {fileID: 1587127965}

@@ -47,14 +47,16 @@ public class SoilLayer : MonoBehaviour
         switch (soilType)
         {
             case SoilType.TopSoil:
-                return tool == ToolSystem.ToolType.Shovel;
+                return tool == ToolSystem.ToolType.Trowel   // ⭐ 手铲
+                    || tool == ToolSystem.ToolType.Shovel;  // （可选）铁锹也能挖
 
             case SoilType.SoftSoil:
                 return tool == ToolSystem.ToolType.Shovel
+                    || tool == ToolSystem.ToolType.Trowel   // ⭐ 加上手铲
                     || tool == ToolSystem.ToolType.Brush;
 
             case SoilType.HardSoil:
-                return tool == ToolSystem.ToolType.Shovel;
+                return tool == ToolSystem.ToolType.Shovel;  // 只允许铁锹
 
             case SoilType.Fine:
                 return tool == ToolSystem.ToolType.Brush;
@@ -73,11 +75,11 @@ public class SoilLayer : MonoBehaviour
         switch (soilType)
         {
             case SoilType.TopSoil:
-                return "需要【洛阳铲】或【铁锹】挖掘";
+                return "需要【手铲】或【铁锹】挖掘";
             case SoilType.SoftSoil:
-                return "可使用【洛阳铲/铁锹】或【毛刷】";
+                return "可使用【手铲/铁锹】或【毛刷】";
             case SoilType.HardSoil:
-                return "需要【洛阳铲】或【铁锹】";
+                return "需要【铁锹】";
             case SoilType.Fine:
                 return "需要【毛刷】精细清理";
             case SoilType.Artifact:
@@ -90,6 +92,26 @@ public class SoilLayer : MonoBehaviour
     // ================= 挖掘入口（由ToolSystem调用） =================
     public void OnDig()
     {
+        // ==============================
+        // ⭐ 限制 TopSoil 必须先划线+探测
+        // ==============================
+        if (soilType == SoilType.TopSoil)
+        {
+            TopSoilController topSoil = GetComponent<TopSoilController>();
+
+            if (topSoil != null && !topSoil.allowDig)
+            {
+                Debug.Log("❌ 未满足挖掘条件");
+
+                // ⭐ UI提示（关键）
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.ShowGuidance("请先划线并使用洛阳铲探测");
+                }
+
+                return; // ⭐阻止继续挖掘
+            }
+        }
         // 防止重复挖掘
         if (isDigging)
         {

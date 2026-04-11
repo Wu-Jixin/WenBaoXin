@@ -13,11 +13,12 @@ public class ToolSystem : MonoBehaviour
     public enum ToolType
     {
         None,       // 无工具
-        Shovel,     // 洛阳铲/铁锹
+        Shovel,     // 铁锹
         Brush,      // 毛刷
         Scanner,    // 扫描仪（如果需要）
         Marker,     // 划线工具
-        Probe       // 探孔工具
+        Probe,      // 探孔工具/洛阳铲
+        Trowel      // 手铲
     }
 
     [System.Serializable]

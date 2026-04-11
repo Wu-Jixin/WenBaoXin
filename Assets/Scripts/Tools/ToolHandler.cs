@@ -1,5 +1,6 @@
-using UnityEngine;
 using LibreFracture;
+using UnityEngine;
+using static SoilLayer;
 
 public class ToolHandler : MonoBehaviour
 {
@@ -123,6 +124,10 @@ public class ToolHandler : MonoBehaviour
                 UseProbe(hit);
                 break;
 
+            case ToolType.Trowel:
+                UseTrowel(hit);   
+                break;
+
             default:
                 Debug.Log("未知工具");
                 break;
@@ -166,15 +171,48 @@ public class ToolHandler : MonoBehaviour
 
     void UseShovel(RaycastHit hit)
     {
+        // =========================
+        // ⭐ 1. 先判断 TopSoil
+        // =========================
+        if (hit.collider.CompareTag("TopSoil"))
+        {
+            TopSoilController soil = hit.collider.GetComponent<TopSoilController>();
+
+            if (soil == null)
+            {
+                Debug.LogError("❌ TopSoil 没有挂 TopSoilController！");
+                return;
+            }
+
+            Debug.Log($"状态：Marked={soil.isMarked} Probed={soil.isProbed} AllowDig={soil.allowDig}");
+
+            if (soil.allowDig)
+            {
+                Debug.Log("✅ 挖掘表层土成功");
+
+                Destroy(hit.collider.gameObject);
+            }
+            else
+            {
+                Debug.Log("❌ 不允许挖掘");
+
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.ShowGuidance("请先划线并探测");
+                }
+            }
+
+            return; // ⭐非常重要！
+        }
+
+        // =========================
+        // ⭐ 2. 普通土层
+        // =========================
         if (hit.collider.CompareTag("Soil"))
         {
-            Debug.Log("洛阳铲挖掘土层");
+            Debug.Log("挖掘普通土层");
 
             BreakObject(hit);
-        }
-        else
-        {
-            Debug.Log("洛阳铲只能挖土");
         }
     }
 
@@ -309,5 +347,28 @@ public class ToolHandler : MonoBehaviour
         {
             Debug.Log("探孔工具触发（实际由ProbeSystem执行）");
         }
+    }
+
+    void UseTrowel(RaycastHit hit)
+    {
+        SoilLayer layer = hit.collider.GetComponent<SoilLayer>();
+
+        if (layer == null) return;
+
+        // ⭐ 限制：只能挖表层
+        if (layer.soilType != SoilType.TopSoil)
+        {
+            UIManager.Instance.ShowGuidance("手铲只能用于表层清理");
+            return;
+        }
+
+        // 播放动画
+        Animator anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            anim.SetTrigger("Dig");
+        }
+
+        layer.OnDig();
     }
 }
